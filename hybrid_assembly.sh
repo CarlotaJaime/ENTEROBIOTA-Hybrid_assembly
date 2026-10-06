@@ -10,6 +10,10 @@
 
 # Last modification: 05/10/2026 16:01h
 
+# Set up configurations
+set -euo pipefail
+shopt -s nullglob
+
 # Help message
 
 Help()
@@ -52,10 +56,6 @@ echo "--------------------------------------------------------------"
 # Set up environment
 eval "$(conda shell.bash hook)"
 WD=${INPUT_DIR}; cd ${WD}
-
-# Set up configurations
-set -euo pipefail
-shopt -s nullglob
 
 
 # Check if the arguments are given
@@ -159,11 +159,28 @@ conda activate NanoPlot
 
 mkdir -p "${WD}/Nanopore/NanoPlot/raw"
 
-for file in "${WD}"/*.fastq.gz; do # Check name file Nanopore
+ONT_file=()
+
+# Collecting only ONT files 
+for file in "${WD}"/*.fastq.gz; do
+	file_name=$(basename "${file}" )
+	if [[ "${file_name}" == *_R1_001.fastq.gz || "${file_name}" == *_R2_001.fastq.gz ]]; then
+		continue
+	fi
+	ONT_files+=("${file}")
+done
+
+
+
+for file in "${ONT_files[@]}"; do # Check name file Nanopore
 	if [[ -f "${file}" ]]; then
 		id=$(basename "${file}" .fastq.gz)
 		echo "Running NanoPlot on ${id}"
         NanoPlot --fastq "${file}" --outdir "${WD}/Nanopore/NanoPlot/raw/${id}" --tsv_stats
+	else
+		echo "ERROR: No ONT input sequences detected"
+		conda deactivate
+		exit 1
 	fi
 done
 
@@ -195,38 +212,6 @@ for stats_file in "${WD}/Nanopore/NanoPlot/raw"/*/NanoStats.txt; do
 done
 
 #########################################################################
-# ASSEMBLY STRATEGY DECISION
-#########################################################################
-echo ""
-echo "----------------------------------------------------------------"
-echo "3. Aseembly stratgey decision"
-echo "----------------------------------------------------------------"
-
-# Stablishing variables of ONT high quality
-ONT_MIN_DEPTH=20
-ONT_MIN_MEAN_Q=
-ONT_MIN_N50=
-
-mkdir -p "${WD}/final_assemblies"
-
-if [[ ! "${summary_stats_raw}" ]]; then
-	echo "Error: No summary for raw ONT data has been found"
-	exit 1
-fi
-
-# Read the summary file to extract quality values
-tail -n +2 "${summary_stats_raw}" | while IFS=$'\t' read -r sample total_bases mean_quality n50 depth; do
-	num_depth=$(echo "${depth}" | sed 's/x//g')
-	long_read_first="NO" # Predefined value
-	if [[ -n "${num_depth}" ]]; then
-		if (( $(echo "${num_depth} >= ${ONT_MIN_DEPTH}" | bc -l) )) \
-			&& (( $(echo "${mean_quality} >= ${ONT_MIN_MEAN_Q}" | bc -l) )) \
-			&& (( n50 >= ${ONT_MIN_N50} )); then
-			long_read_first="YES"
-		fi
-	fi
-
-#########################################################################
 # FILTERING ILLUMINA AND ONT DATA
 #########################################################################
 
@@ -237,12 +222,12 @@ filtered_ONT="${WD}/Nanopore/Filtlong/${sample}_filtered.fastq.gz"
 
 echo ""
 echo "---------------------------------------------------------"
-echo "4. Filtering Illumina and ONT reads"
+echo "3. Filtering Illumina and ONT reads"
 echo "---------------------------------------------------------"
 
 # Trimming for Illumina raw reads with Trimmmomatic
 echo ""
-echo "------ 4.1.Trimmomatic for trimming raw reads ------"
+echo "------ 3.1.Trimmomatic for trimming raw reads ------"
 
 conda activate trimmomatic
 
@@ -273,7 +258,7 @@ conda deactivate
 # Quality control for Illumina trimmed reads
 
 echo ""
-echo "------ 4.1.2 Quality control after trimming with FastQC ------"
+echo "------ 3.2 Quality control after trimming with FastQC ------"
 
 conda activate fastqc
 
@@ -284,7 +269,7 @@ conda deactivate
 
 # Quality control with MultiQC
 echo ""
-echo "------ 4.1.3 MultiQC analysis ------"
+echo "------ 3.3 MultiQC analysis ------"
 
 if [[ -d "${WD}/trimmomatic/fastqc" && $(ls -A "${WD}/trimmomatic/fastqc") ]]; then
 	conda activate multiqc
@@ -298,17 +283,17 @@ fi
 
 # Filtering for ONT raw reads
 echo ""
-echo "------ 4.1.4 Filtering Oxford Nanopore raw reads with Filtlong ------"
+echo "------ 3.4 Filtering Oxford Nanopore raw reads with Filtlong ------"
 
 mkdir -p "${WD}/Nanopore/Filtlong"
 
 conda activate Filtlong
 
-for file in "${WD}"/*.fastq.gz; do # Check name file Nanopore
+for file in "${ONT_files[@]}"; do # Check name file Nanopore
 	if [[ -f "${file}" ]]; then
 		id=$(basename "${file}" .fastq.gz)
 		echo "Running Filtlong on ${id}"
-       	filtlong --min_length 1000 --keep_percent 90 --mean_q_weigth 9 "${file}" > "${WD}/Nanopore/Filtlong/${id}_filtered.fastq.gz"
+       	filtlong --min_length 1000 --keep_percent 90 --mean_q_weigth 9 "${file}" | gzip > "${WD}/Nanopore/Filtlong/${id}_filtered.fastq.gz"
 	fi
 done
 
@@ -317,7 +302,7 @@ conda deactivate
 # Quality control of Nanopore filtered reads
 
 echo ""
-echo "------ 4.1.5 Quality control of Oxford NanoporeDespres es torna filtered reads with NanoPlot ------"
+echo "------ 3.5 Quality control of Oxford NanoporeDespres es torna filtered reads with NanoPlot ------"
 
 mkdir -p "${WD}/Nanopore/NanoPlot/filtered"
 
@@ -355,6 +340,39 @@ for stats_file in "${WD}/Nanopore/NanoPlot/filtered"/*/NanoStats.txt; do
        	}' "${stats_file}" >> "${summary_stats_filtered}"
 	fi
 done
+
+
+#########################################################################
+# ASSEMBLY STRATEGY DECISION
+#########################################################################
+echo ""
+echo "----------------------------------------------------------------"
+echo "4. Aseembly stratgey decision"
+echo "----------------------------------------------------------------"
+
+# Stablishing variables of ONT high quality
+ONT_MIN_DEPTH=20
+ONT_MIN_MEAN_Q=
+ONT_MIN_N50=
+
+mkdir -p "${WD}/final_assemblies"
+
+if [[ ! "${summary_stats_raw}" ]]; then
+	echo "Error: No summary for raw ONT data has been found"
+	exit 1
+fi
+
+# Read the summary file to extract quality values
+tail -n +2 "${summary_stats_raw}" | while IFS=$'\t' read -r sample total_bases mean_quality n50 depth; do
+	num_depth=$(echo "${depth}" | sed 's/x//g')
+	long_read_first="NO" # Predefined value
+	if [[ -n "${num_depth}" ]]; then
+		if (( $(echo "${num_depth} >= ${ONT_MIN_DEPTH}" | bc -l) )) \
+			&& (( $(echo "${mean_quality} >= ${ONT_MIN_MEAN_Q}" | bc -l) )) \
+			&& (( n50 >= ${ONT_MIN_N50} )); then
+			long_read_first="YES"
+		fi
+	fi
 
 #########################################################################
 # HYBRID ASSEMBLY
@@ -423,30 +441,7 @@ else
 					--genome_size "${GENOME_SIZE}"
 			fi
 		done
-	done
-
-# Identifying plasmids from ONT reads with Plassembler
-	mkdir -p "${WD}/autocycler/plassembler/${sample}"
-
-	# Crear un database de plassembler
-	if [[ -d "/miniconda/envs/plassembler/database" ]]; then
-		echo "Database directory is created"
-	else
-		plassembler download -d "/miniconda/envs/plassembler/database"
-
-	plassembler run \
-		-d "${plassembler_database}" \
-		-l "${filtered_ONT}" \
-		-o "${WD}/autocycler/plassembler/${sample}" \
-		-1 "${trimmed_R1}" \
-		-2 "${trimmed_R2}" \
-		-c "${GENOME_SIZE}"
-
-	plassembler_result="${WD}/autocycler/plassembler/${sample}/plassembler.fasta"
-	if [[ -f "${plassembler_result}" ]]; then
-		cp "${plassembler_result}" "${WD}/autocycler/${sample}/assemblies/plassembler.fasta"
-	else
-		echo "Error: Plassembler results not found"		
+	done	
 
 	mkdir -p "${WD}/autocycler/${sample}/autocycler_compress_cluster_output"
 	autocycler compress -i "${WD}/autocycler/${sample}/assembllies" -a "${WD}/autocycler/${sample}/autocycler_compress_cluster_output"
@@ -613,6 +608,43 @@ done
 
 echo ""
 echo "Hybrid assembly pipeline completed successfully"
+
+############################################
+# Plasmid detection
+############################################
+
+# Plassembler (recover small plasmids)
+echo ""
+echo "Plasmid detection: Plassembler"
+
+mkdir -p "${WD}/autocycler/plassembler/${sample}"
+
+conda activate plassembler
+
+# Crear un database de plassembler
+if [[ -d "/miniconda/envs/plassembler/database" ]]; then
+	echo "Database directory is created"
+else
+	mkdir -p "/miniconda/envs/plassembler/database"
+	conda activate plassembler
+	plassembler download -d "/miniconda/envs/plassembler/database"
+	conda deactivate
+
+plassembler run \
+	-d "${plassembler_database}" \
+	-l "${filtered_ONT}" \
+	-o "${WD}/autocycler/plassembler/${sample}" \
+	-1 "${trimmed_R1}" \
+	-2 "${trimmed_R2}" \
+	-c "${GENOME_SIZE}"
+
+conda deactivate
+
+plassembler_result="${WD}/autocycler/plassembler/${sample}/plassembler.fasta"
+if [[ -f "${plassembler_result}" ]]; then
+	cp "${plassembler_result}" "${WD}/autocycler/${sample}/assemblies/plassembler.fasta"
+else
+	echo "Error: Plassembler results not found"	
 
 #################################
 # End of draft hybrid assembly
