@@ -8,7 +8,7 @@
 # Hybrid assembly with Illumina short-reads and Oxford Nanopore Technology long-reads sequencing data
 # This script is a draft for hybrid assembly and characterization of isolates selected for animal model analyses
 
-# Last modification: 05/10/2026 16:01h
+# Last modification: 08/10/2026 12:51h
 
 # Set up configurations
 set -euo pipefail
@@ -568,6 +568,13 @@ echo "----------------------------------------------------------------"
 
 mkdir -p "${WD}/mapping"
 mkdir -p "${WD}/mapping/${sample}"
+
+# Divide final assembly multifasta in diferent replicons
+for file in "${WD}/final_assemblies/"*.fasta
+	id=(basename "${file}" _final.fasta)
+	seqkit split2 "${file}" -s 1 -O "${WD}/final_assemblies/${id}/${id}.fasta"
+done
+
 for fa in "${WD}/final_assemblies/"*_final.fasta; do
 	if [[ -f "${fa}" ]]; then
 		sample=(basename "${fa}" _final.fasta)
@@ -575,13 +582,15 @@ for fa in "${WD}/final_assemblies/"*_final.fasta; do
         final_contigs=$(grep -c '^>' "${fa}")
 		# Nanopore
 		if [[ -f "${filtered_ONT}" ]]; then
-			ONT_BAM="${WD}/mapping/${sample}/${sample}_ONT.bam"
+			ont_bam="${WD}/mapping/${sample}/${sample}_ONT.bam"
 
 			conda activate minimap2
 
 			minimap2 -ax map-ont "${fa}" "${filtered_ONT}" | samtools sort -@ 4 -o "${ont_bam}"
 			samtools index "${ont_bam}"
 			samtools flagstat "${ont_bam}" > "${WD}/mapping/${sample}/${sample}_ONT_flagstat.txt"
+			# Put depth per base into files
+			samtools depth -a "${ont_bam}" > "${ont_bam}_nanopore_depths.txt"
 
 			conda deactivate
 		fi
@@ -598,6 +607,7 @@ for fa in "${WD}/final_assemblies/"*_final.fasta; do
 			bwa mem "${fa}" "${trimmed_R1}" "${trimmed_R2}" | samtools sort -@ 4 -o "${illumina_bam}"
 			samtools index "${illumina_bam}"
 			samtools flagstat "${illumina_bam}" > "${WD}/mapping/${sample}/${sample}_Illumina_flagstat.txt"
+			samtools depth -a "${illumina_bam}" > "${illumina_bam}_illumina_depths.txt"
 
 			conda deactivate
 
@@ -608,6 +618,27 @@ done
 
 echo ""
 echo "Hybrid assembly pipeline completed successfully"
+
+############################################
+# ESTIMATE ERROR RATE
+############################################
+
+mkdir -p "${WD}/final_assemblies/error_rate"
+mkdir -p "${WD}/final_assemblies/error_rate/reference"
+
+echo "Sample\tAccuray\tError rate\tDistance between errors"
+
+for sample in "${WD}/final_assemblies/"*_final.fasta; do
+	id=(basename "${sample}" _final.fasta)
+	grep "${id}" "${WD}/TFM/${SPECIES}/skesa/"*.fasta # Establishing Illumina assemblies with SKESA as the reference for nucleotide accuracy
+	cp "${WD}/TFM/${SPECIES}/skesa/${id}.fasta" "${WD}/final_assemblies/error_rate/reference"
+	# Build a BLAST database of hybrid assemblies (Get the results in tabular format)
+	makeblastdb -dbtype nucl -in "${WD}/final_assemblies/"*.fasta
+	# BLAST assemblies against the reference
+	blastn -db "${WD}/final_assemblies/${id}.fasta" -query "${WD}/TFM/${SPECIES}/skesa/${id}.fasta" -outfmt 6 > BLAST_output
+	# Calcule the error rates
+	python3 accuracy.py BLAST_output
+done
 
 ############################################
 # Plasmid detection
@@ -628,7 +659,7 @@ else
 	mkdir -p "/miniconda/envs/plassembler/database"
 	conda activate plassembler
 	plassembler download -d "/miniconda/envs/plassembler/database"
-	conda deactivate
+fi
 
 plassembler run \
 	-d "${plassembler_database}" \
