@@ -429,9 +429,20 @@ else
 		--genome_size "${GENOME_SIZE}" \
 		--min_read_depth 50
 
+	# Crear un database de plassembler before the assembly
+	conda activate plassembler
+	if [[ -d "/miniconda/envs/plassembler/database" ]]; then
+		echo "Database directory is created"
+	else
+		mkdir -p "/miniconda/envs/plassembler/database"
+		conda activate plassembler
+		plassembler download -d "/miniconda/envs/plassembler/database"
+	fi
+	conda deactivate
+
 	# Combining the assemblies into a consensus assembly
 	mkdir -p "${WD}/autocycler/${sample}/assemblies"
-	for assembler in flye miniasm metamdbg; do
+	for assembler in raven myloasm miniasm flye metamdbg necat nextdenovo plassembler canu; do
 		for read_file in "${WD}/autocycler/${sample}/subsampled_reads"/*.fastq.gz; do
 			if [[ -f "${read_file}" ]]; then
 				read_id=$(basename "${read_file}" .fastq)
@@ -652,28 +663,19 @@ mkdir -p "${WD}/autocycler/plassembler/${sample}"
 
 conda activate plassembler
 
-# Crear un database de plassembler
-if [[ -d "/miniconda/envs/plassembler/database" ]]; then
-	echo "Database directory is created"
-else
-	mkdir -p "/miniconda/envs/plassembler/database"
-	conda activate plassembler
-	plassembler download -d "/miniconda/envs/plassembler/database"
-fi
-
 plassembler run \
 	-d "${plassembler_database}" \
 	-l "${filtered_ONT}" \
-	-o "${WD}/autocycler/plassembler/${sample}" \
+	-o "${WD}/plassembler/${sample}" \
 	-1 "${trimmed_R1}" \
 	-2 "${trimmed_R2}" \
 	-c "${GENOME_SIZE}"
 
 conda deactivate
 
-plassembler_result="${WD}/autocycler/plassembler/${sample}/plassembler.fasta"
+plassembler_result="${WD}/plassembler/${sample}/plassembler.fasta"
 if [[ -f "${plassembler_result}" ]]; then
-	cp "${plassembler_result}" "${WD}/autocycler/${sample}/assemblies/plassembler.fasta"
+	cp "${plassembler_result}" "${WD}/${sample}/assemblies/plassembler.fasta"
 else
 	echo "Error: Plassembler results not found"	
 
