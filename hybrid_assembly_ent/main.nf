@@ -1,10 +1,10 @@
 #!/usr/bin/env nextflow
 /*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     Project: ENTEROBIOTA
     Process: Hybrid assembly using Illumina and ONT data
     Species: Enterococcus faecalis and Enterococcus faecium
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
 /*
@@ -64,6 +64,44 @@ workflow {
     */
     input_ch = channel.fromPath(params.input)
                         .splitCsv(header: true)
+                        .map { row -> tuple( [id: row.sample.toString()],
+                        file(row.illumina_r1),
+                        file(row.illumina_r2),
+                        file(row.ont), genome_size)}
+
+    // Quality control Illumina
+    raw_fastqc(samples_ch.map { meta, r1, r2, ont, gs -> tuple(meta, r1, r2)})
+    raw_multiqc(illumina_fastqc.out.zip_reports.map { meta, report -> report }.collect())
+    
+    // Trimming Illumina
+    trimmomatic(samples_ch.map { meta, r1, r2, u1, u2 -> tuple(meta, r1, r2)})
+    trimmed_fastqc(trimmomatic.out.reads.map { meta, r1, r2, u1, u2 -> tuple(meta, r1, r2)})
+    multiqc_trimmed(trimmed_fastqc.out.zip_reports.map { meta, report -> report }.collect())
+
+    // Quality control ONT
+    ont_qc_filter(samples_ch.map { meta, r1, r2, ontfile, gs -> tuple(meta, ontfile, gs)})
+
+    // Hybrid assembly
+    assembly_input = trimmomatic.out.reads.join(ont_qc_filter.out.filtered, by: 0).map { meta, r1, r2, u1, u2, ont_filtered -> tuple(meta, r1, r2, ont_filtered)}
+    unicycler(assembly_input)
+
+    // Assembly quality control
+    if (params.run_busco) {
+        busco(unicycler.out.assembly)
+    }
+    if (params.run_quast) {
+        quast(unicycler.out.assembly.collect())
+    }
+
+    // Mapping
+    if (params.run_mapping) {
+        mapping_input = unicycler.out.assembly.join(ont_qc_filter.out.filtered, by: 0).join(trimmomatic.out.reads, by: 0).map { meta, assembly, ontfile, r1, r2, u1, u2 -> 
+        tuple(meta, assembly, ontfile, r1, r2)
+        }
+        map_ont(mapping_input.map { meta, assembly, ontfile, r1, r2 -> tuple(meta, assembly, ontfile)})
+        map_illumina(mapping_input.map { meta, assembly, ontfile, r1, r2 -> tuple(meta, assembly, r1, r2)})
+    }
+
                         
 
 }
