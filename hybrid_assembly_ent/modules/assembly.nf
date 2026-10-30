@@ -11,6 +11,6 @@ process unicycler {
 
     script:
     """
-    unicycler -1 "${r1}" -2 "${r2}" -l "${ontfile}" -o "unicycler_output" --mode normal --threads ${task.cpus}
+    unicycler -1 "${r1}" -2 "${r2}" -l "${ont}" -o "unicycler_output" --mode normal --threads ${task.cpus}
     """
 }

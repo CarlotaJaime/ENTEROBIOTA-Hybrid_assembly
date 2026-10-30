@@ -14,7 +14,7 @@ process map_ont {
 
     script:
     """
-    minimap2 -t ${task.cpus} -ax map-ont "${assembly}" "${ontfile}" | samtools sort -@ ${task.cpus} -o "${meta.id}_ONT.bam"
+    minimap2 -t ${task.cpus} -ax map-ont "${assembly}" "${ont}" | samtools sort -@ ${task.cpus} -o "${meta.id}_ONT.bam"
 	samtools index "${meta.id}_ONT.bam"
 	samtools flagstat "${meta.id}_ONT.bam" > "${meta.id}_ONT_flagstat.txt"
 	samtools depth -a "${meta.id}_ONT.bam" > "${meta.id}_ONT_depths.txt"
