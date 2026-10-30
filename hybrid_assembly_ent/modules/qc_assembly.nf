@@ -28,6 +28,6 @@ process quast {
 
     script:
     """
-    quast ${assemblies} --output-dir quast_report --threads ${task.cpus}
+    quast ${assembly} --output-dir quast_report --threads ${task.cpus}
     """
 }
