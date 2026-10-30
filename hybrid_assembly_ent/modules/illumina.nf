@@ -49,19 +49,19 @@ process trimmomatic {
     script:
     def adapter= params.adapters ?
         "ILLUMINACLIP:${params.adapters}:2:30:10" : ""
-
     """
     trimmomatic PE \
+        -threads ${task.cpus} \
 		"${r1}" "${r2}" \
-		${meta.id}_1_paired.fastq.gz" \
-        ${meta.id}_1_unpaired.fastq.gz" \
-        ${meta.id}_2_paired.fastq.gz" \
-        ${meta.id}_2_unpaired.fastq.gz" \
+		"${meta.id}_1_paired.fastq.gz" \
+        "${meta.id}_1_unpaired.fastq.gz" \
+        "${meta.id}_2_paired.fastq.gz" \
+        "${meta.id}_2_unpaired.fastq.gz"\
+        ${adapter}\
         LEADING:3 \
 		TRAILING:3 \
 		SLIDINGWINDOW:5:25 \
 		MINLEN:60 \
-        -threads ${task.cpus}
     """
 
 }

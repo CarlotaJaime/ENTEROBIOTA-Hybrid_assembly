@@ -1,10 +1,10 @@
 process nanoplot {
     tag "$meta.id"
     conda 'bioconda::nanoplot=1.48.0'
-    publishDir "${params.outdir}/nanopore", mode: 'copy'
+    publishDir "${params.outdir}/nanopore/nanoplot", mode: 'copy'
 
     input:
-    tuple val(meta), path(ontfile), val(genome_size)
+    tuple val(meta), path(ontfile)
 
     output:
     tuple val(meta), path("*.html"), emit: html
@@ -18,10 +18,25 @@ process nanoplot {
     # Quality control of unprocessed ONT data
     NanoPlot --fastq "${ontfile}" --outdir nanoplot_raw --tsv_stats
 
-    # Filtering ONT data
-    filtlong --min_length 1000 --keep_percent 90 --mean_q_weigth 9 "${ontfile}" | gzip > "${meta.id}_filtered.fastq.gz"
-
     # Quality control of filtered ONT data
     NanoPlot --fastq "${ontfile}" --outdir nanoplot_filtered --tsv_stats   
+    """
+}
+
+process filtlong {
+    tag "$meta.id"
+    conda 'bioconda::filtlong=0.3.1'
+    publishDir "${params.outdir}/nanopore/filtered", mode: 'copy'
+
+    input:
+    tuple val(meta), path(ontfile)
+
+    output:
+    tuple val(meta), path("${meta.id}_filtered.fastq.gz"), emit: filtered_ont
+
+    script:
+    """
+     # Filtering ONT data
+    filtlong --min_length 1000 --keep_percent 90 --mean_q_weigth 9 "${ontfile}" | gzip > "${meta.id}_filtered.fastq.gz"
     """
 }

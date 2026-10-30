@@ -21,7 +21,7 @@ process quast {
     publishDir "${params.outdir}/quast", mode: 'copy'
 
     input:
-    path(assembly)
+    tuple val(meta), path(assembly)
 
     output:
     path("quast_report"), emit: results

@@ -4,7 +4,7 @@ process map_ont {
     publishDir "${params.outdir}/mapping", mode: 'copy'
 
     input:
-    tuple val(meta), path(assembly), path(ont)
+    tuple val(meta), path(assembly), path(ontfile)
 
     output:
     path("${meta.id}_ONT.bam"), emit: bam
@@ -14,10 +14,10 @@ process map_ont {
 
     script:
     """
-    minimap2 -t ${task.cpus} -ax map-ont "${assembly}" "${ont}" | samtools sort -@ ${task.cpus} -o "${meta.id}_ONT.bam"
+    minimap2 -t ${task.cpus} -ax map-ont "${assembly}" "${ontfile}" | samtools sort -@ ${task.cpus} -o "${meta.id}_ONT.bam"
 	samtools index "${meta.id}_ONT.bam"
 	samtools flagstat "${meta.id}_ONT.bam" > "${meta.id}_ONT_flagstat.txt"
-	samtools depth -a "${meta.id}_ONT.bam" > "${meta.id}_ONT_depths.txt"
+	samtools depth -a "${meta.id}_ONT.bam" > "${meta.id}_ONT_depth.txt"
     """
 }
 
@@ -41,6 +41,6 @@ process map_illumina {
 	bwa mem -t ${task.cpus} "${assembly}" "${r1}" "${r2}" | samtools sort -@ ${task.cpus} -o "${meta.id}_Illumina.bam"
 	samtools index "${meta.id}_Illumina.bam"
 	samtools flagstat "${meta.id}_Illumina.bam" > "${meta.id}_Illumina_flagstat.txt"
-	samtools depth -a "${meta.id}_Illumina.bam" > "${meta.id}_illumina_depths.txt"
+	samtools depth -a "${meta.id}_Illumina.bam" > "${meta.id}_Illumina_depth.txt"
     """
 }
