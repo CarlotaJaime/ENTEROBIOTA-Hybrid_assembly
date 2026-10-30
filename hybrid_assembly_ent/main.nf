@@ -12,12 +12,17 @@
     Import modules and subworkflows
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
+// Include modules
 include { raw_fastqc; trimmomatic; trimmed_fastqc; raw_multiqc; trimmed_multiqc } from './modules/illumina'
 include { nanoplot; filtlong; nanostats } from './modules/ont'
 include { unicycler; autocycler; medaka; polipolish } from './modules/assembly'
 include { map_ont; map_illumina } from './modules/mapping'
 include { busco; quast } from './modules/qc_assembly'
 include { plassembler } from './modules/plasmids'
+// Include subworkflows
+include { PREPROCESSING } from './subworflows/preprocessing'
+include { HYBRID_ASSEMBLY } from './subworkflows/hybrid_assembly'
+include { CHARACTERIZATION } from './subworkflows/characterization'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -62,12 +67,18 @@ workflow {
     /* Create a channel for the input file
         Samplesheet must contain 4 field (Sample, Illumina R1, Illumina R2 and ONT)
     */
-    input_ch = channel.fromPath(params.input)
+    ch_input = channel.fromPath(params.input)
                         .splitCsv(header: true)
                         .map { row -> tuple( [id: row.sample.toString()],
                         file(row.illumina_r1),
                         file(row.illumina_r2),
                         file(row.ont), genome_size)}
+    ch_illumina_raw = ch_input.map { meta, r1, r2, ont -> [ meta, r1, r2 ] }
+    ch_ont_raw = ch_input.map { map, r1, r2, ont -> [ meta, r1, r2 ] }
+
+    PREPROCESSING ( ch_illumina_raw, ch_ont_raw)
+    HYBRID_ASSEMBLY (PREPROCESSING.out.trimmed_illumina, PREPROCESSING.out.filtered_ont)
+    CHARACTERIZATION (HYBRID_ASSEMBLY.out.assembly, PREPROCESSING.out.trimmed_illumina, PREPROCESSING.out.filtered_ont)
 
     // Quality control Illumina
     raw_fastqc(samples_ch.map { meta, r1, r2, ont, gs -> tuple(meta, r1, r2)})
