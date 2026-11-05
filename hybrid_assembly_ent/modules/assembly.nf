@@ -12,5 +12,6 @@ process unicycler {
     script:
     """
     unicycler -1 "${r1}" -2 "${r2}" -l "${ontfile}" -o "unicycler_output" --mode normal --threads ${task.cpus}
+    cp unicycler_output/assembly.fasta "${meta.id}_final.fasta" 
     """
-}
+    }

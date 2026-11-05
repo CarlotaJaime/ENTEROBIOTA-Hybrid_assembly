@@ -23,7 +23,7 @@ process raw_multiqc {
     publishDir "${params.outdir}/multiqc/raw" , mode: 'copy'
 
     input:
-    path(reports) // Shouldn't it be zip_reports
+    path(reports) 
 
     output:
     path("multiqc_report.html"), emit: final_report
@@ -47,7 +47,7 @@ process trimmomatic {
     tuple val(meta), path("${meta.id}_1_paired.fastq.gz"), path("${meta.id}_2_paired.fastq.gz"), path("${meta.id}_1_unpaired.fastq.gz"), path("${meta.id}_2_unpaired.fastq.gz"), emit: reads
     
     script:
-    def adapter= params.adapters ?
+    def adapter = params.adapters ?
         "ILLUMINACLIP:${params.adapters}:2:30:10" : ""
     """
     trimmomatic PE \
@@ -91,7 +91,7 @@ process trimmed_multiqc {
     publishDir "${params.outdir}/multiqc/trimmed" , mode: 'copy'
 
     input:
-    path(reports) // Shouldn't it be zip_reports
+    path(reports) 
 
     output:
     path("multiqc_report.html"), emit: final_report

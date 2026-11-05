@@ -4,7 +4,7 @@ process nanoplot {
     publishDir "${params.outdir}/nanopore/nanoplot", mode: 'copy'
 
     input:
-    tuple val(meta), path(ontfile)
+    tuple val(meta), path(ontfile), path(filtered_ont)
 
     output:
     tuple val(meta), path("*.html"), emit: html
@@ -19,7 +19,7 @@ process nanoplot {
     NanoPlot --fastq "${ontfile}" --outdir nanoplot_raw --tsv_stats
 
     # Quality control of filtered ONT data
-    NanoPlot --fastq "${ontfile}" --outdir nanoplot_filtered --tsv_stats   
+    NanoPlot --fastq "${filtered_ont}" --outdir nanoplot_filtered --tsv_stats   
     """
 }
 

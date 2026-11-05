@@ -19,3 +19,26 @@ This tool is used when the quality of ONT data is sufficient. The assembly is pe
 ## Characterization
 The quality control of the assembly is performed with BUSCO and QUAST, then a mapping is performed for ONT and Illumina reads against the hybrid assembly, and the error rate of the assembly is calculated.
 
+## Execute the workflow
+In order to execute the workflow the `samplesheet.csv` must have this structure following the structure of a CSV file:
+
+sample,illumina_r1,illumina_2,ont
+
+For example:
+
+```
+sample1_name,sample1_name_R1.fastq.gz,sample1_name_R2.fastq.gz,sample1_name_ONT.fastq.gz
+sample2_name,sample2_name_R1.fastq.gz,sample2_name_R2.fastq.gz,sample2_name_ONT.fastq.gz
+sample3_name,sample3_name_R1.fastq.gz,sample3_name_R2.fastq.gz,sample3_name_ONT.fastq.gz
+```
+
+And to execute the workflow the following command is the basic structure to execute in the terminal:
+
+```
+nextflow run main.nf \
+    --input samplesheet.csv
+    --species Enterococcus_faecalis \
+    --outdir results \
+    --adapters adapters.fa
+    -with-conda
+```

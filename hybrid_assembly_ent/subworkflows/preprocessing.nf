@@ -16,8 +16,9 @@ workflow PREPROCESSING {
 
     main:
     // For ONT data
-    nanoplot(ch_ont)
     filtlong(ch_ont)
+    ch_nanoplot_input = ch_ont.join(filtlong.out.filtered_ont)
+    nanoplot(ch_nanoplot_input)
 
     // For Illumina data
     raw_fastqc(ch_illumina)
