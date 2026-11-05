@@ -9,12 +9,17 @@ For the quality control of Illumina data, FastQC and MultiQC are used for qualit
 For Nanopore, a quality control of raw data is performed with NanoPlot, the sequences are trimmed with Filtlong and a following quality control of filtered data is also performed by NanoPlot.
 
 ## Hybrid assembly
-The workflow has integrated a decision block that depending on the quality of the reads, there are two possibilities of assembly:
+The workflow has integrated a decision block that depending on the quality of the reads there are two possibilities of assembly:
 
 ### Unicycler
 This tool is used when the quality of ONT data is insufficient. The assembly is performed with the short-reads-first strategy using Illumina reads to performe the initial assembly that is polished with Nanopore data.
 ### Autocycler
-This tool is used when the quality of ONT data is sufficient. The assembly is performed with the long-reads-first strategy using ONT reads to perform the initial assembly and Polypolish is used to polish the ONT assembly with Illumina reads. Additionally, Medaka is used to polish the ONT data before the initial assembly.
+This tool is used when the quality of ONT data is sufficient. The assembly is performed with the long-reads-first strategy using ONT reads to perform the initial assembly and Polypolish is used to polish the ONT assembly with Illumina reads. Additionally, Medaka is used to polish the ONT data before the initial assembly.  
+
+The parameters of decision are based on ONT quality data and are defined in `nextflow.config`:  
+- Minimal ONT depth = 20X
+- Minimal mean quality = X
+- Minimal N50 value = X
 
 ## Characterization
 The quality control of the assembly is performed with BUSCO and QUAST, then a mapping is performed for ONT and Illumina reads against the hybrid assembly, and the error rate of the assembly is calculated.

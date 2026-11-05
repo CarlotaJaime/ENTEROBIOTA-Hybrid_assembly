@@ -27,7 +27,7 @@ params {
     species = null
     outdir = 'results'
     adapters = null
-    busco_lineage = 'enterococcus_odb12' 
+    busco_lineage = 'enterococcus_odb12'
 }
 
 def genome_size_specie(String species) {
