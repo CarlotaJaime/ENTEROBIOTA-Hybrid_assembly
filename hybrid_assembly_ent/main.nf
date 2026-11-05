@@ -28,6 +28,7 @@ params {
     outdir = 'results'
     adapters = null
     busco_lineage = 'enterococcus_odb12'
+    long_reads_first = false
 }
 
 def genome_size_specie(String species) {
@@ -58,10 +59,8 @@ workflow {
     */
     ch_input = channel.fromPath(params.input)
                         .splitCsv(header: true)
-                        .map { row -> tuple( [id: row.sample.toString()],
-                        file(row.illumina_r1),
-                        file(row.illumina_r2),
-                        file(row.ont), genome_size)}
+                        .map { row -> tuple( [id: row.sample.toString(), genome_size: genome_size],
+                        tuple( file(row.illumina_r1), file(row.illumina_r2), file(row.ont)))}
     ch_illumina_raw = ch_input.map { meta, r1, r2, ont -> tuple(meta, r1, r2) }
     ch_ont_raw = ch_input.map { meta, r1, r2, ont -> tuple(meta, r1, r2) }
 

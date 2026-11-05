@@ -68,3 +68,59 @@ process autocycler {
     cp autocycler_out/concensus_assembly.fasta "${meta.id}_autocycler.fasta"
     """
 }
+
+process medaka {
+    tag "$meta.id"
+    conda 'bioconda::medaka=2.2.2'
+    publishDir "${params.outdir}/autocycler", mode: 'copy'
+
+    input:
+    tuple val(meta),  path(ontfile), val(genome_size)
+
+    output:
+    tuple val(meta), path("${meta.id}_autocycler_final.fasta"), emit: assembly
+
+    script:
+    """
+    medaka_consensus \
+		-i "${ontfile}" \
+		-d "${assembly}" \
+		-o medaka_output \
+        -t ${task.cpus}
+    cp medaka_output/concensus.fasta "${meta.id}_medaka.fasta"        
+    """
+}
+
+process polypolish {
+    tag "$meta.id"
+    conda 'bioconda::polypolish=0.7.1'
+    publishDir "${params.outdir}/polypolish", mode: 'copy'
+
+    input:
+    tuple val(meta), path(assembly), path(r1), path(r2)
+
+    output:
+    tuple val(meta), path("${meta.id}_final.fasta"), emit: assembly
+
+    script:
+    """
+    ## Index assembly with BWA
+	bwa index "${assembly}"
+	# Map Illumina reads
+	bwa mem -a "${assembly}" "${r1}" > alignments_R1.sam
+	bwa mem -a "${assembly}" "${r2}" > alignments_R2.sam
+
+	# Filter alignments
+	polypolish filter \
+		--in1 alignments_R1.sam \
+		--in2 alignments_R2.sam \
+		--out1 filtered_R1.sam \
+		--out2 filtered_R2.sam
+
+	# Final polish step
+	polypolish polish \
+		"${assembly}" \
+		filtered_R1.sam \
+		filtered_R2.sam > "${meta.id}_final.fasta"
+    """
+}
