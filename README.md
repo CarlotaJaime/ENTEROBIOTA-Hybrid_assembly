@@ -20,11 +20,11 @@ For Nanopore, a quality control of raw data is performed with `NanoPlot`, the se
 
 | Sequencing strategy | Bioinformatic tools | Version | Citation | Repository |
 | :---: | :---: | :---: | :---: | :---: |
-| Illumina | FastQC | 0.13.0 | [[1]](#wingett-s-w--andrews-s-2018-fastq-screen-tool-for-multi-genome-mapping-and-quality-control-f1000research-7-1338) | [GitHub](https://github.com/s-andrews/FastQC.git) |
-| Illumina | MultiQC | 1.35.0 | [[2]] |
-| Illumina | Trimmomatic | 0.41 | [[6]] |
-| Nanopore | NanoPlot | 1.48.0 | [[3]] |
-| Nanopore | Filtlong | 0.3.1 | [[7]] |
+| Illumina | FastQC | 0.13.0 | 1 | [FastQC repository ](https://github.com/s-andrews/FastQC.git) |
+| | MultiQC | 1.35.0 | 2 | [MultiQC repository ](https://github.com/MultiQC/MultiQC.git) |
+| | Trimmomatic | 0.41 | 6 | [Trimmomatic repository ](https://github.com/usadellab/Trimmomatic.git) |
+| Nanopore | NanoPlot | 1.48.0 | 3 | [NanoPlot repository ](https://github.com/wdecoster/NanoPlot.git) |
+| | Filtlong | 0.3.1 | 7 | [Filtlong repository ](https://github.com/rrwick/Filtlong.git) |
 
 ## Hybrid assembly
 The workflow has integrated a decision block that depending on the quality of the reads there are two possibilities of assembly:
