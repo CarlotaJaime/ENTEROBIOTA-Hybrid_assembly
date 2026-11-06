@@ -18,6 +18,18 @@ This project aims to characterize the genomes of clinical and probiotic isolates
 For the quality control of Illumina data, `FastQC` and `MultiQC` are used for quality control of raw data, then `Trimmomatic` is used for the trimming of the raw reads, and a quality control of trimmed reads is performed also with `FastQC` and `MultiQC`.
 For Nanopore, a quality control of raw data is performed with `NanoPlot`, the sequences are trimmed with `Filtlong` and a following quality control of filtered data is also performed by `NanoPlot`.
 
+| Sequencing strategy | Bioinformatic tools | Version | Citation | Repository |
+| :---: | :---: | :---: | :---: |
+| Illumina | FastQC | 0.13.0 | 1 |
+| :---: | :---: | :---: | :---: |
+| Illumina | MultiQC | 1.35.0 | 2 |
+| :---: | :---: | :---: | :---: |
+| Illumina | Trimmomatic | 0.41 | 6 |
+| :---: | :---: | :---: | :---: |
+| Nanopore | NanoPlot | 1.48.0 | 3 |
+| :---: | :---: | :---: | :---: |
+| Nanopore | Filtlong | 0.3.1 | 7 |
+
 ## Hybrid assembly
 The workflow has integrated a decision block that depending on the quality of the reads there are two possibilities of assembly:
 
@@ -60,27 +72,27 @@ nextflow run main.nf \
 
 ## Citation
 ### Quality control
-Wingett, S. W., & Andrews, S. (2018). FastQ Screen: A tool for multi-genome mapping and quality control. _F1000Research_, 7, 1338.  
+1. Wingett, S. W., & Andrews, S. (2018). FastQ Screen: A tool for multi-genome mapping and quality control. _F1000Research_, 7, 1338.  
 
-Ewels, P., Magnusson, M., Lundin, S., & Käller, M. (2016). MultiQC: summarize analysis results for multiple tools and samples in a single report. Bioinformatics, 32(19), 3047-3048.
-De Coster, W., & Rademakers, R. (2023). NanoPack2: population-scale evaluation of long-read sequencing data. _Bioinformatics_, 39(5), btad311.  
+2. Ewels, P., Magnusson, M., Lundin, S., & Käller, M. (2016). MultiQC: summarize analysis results for multiple tools and samples in a single report. Bioinformatics, 32(19), 3047-3048.
+3. De Coster, W., & Rademakers, R. (2023). NanoPack2: population-scale evaluation of long-read sequencing data. _Bioinformatics_, 39(5), btad311.  
 
-Simão, F. A., Waterhouse, R. M., Ioannidis, P., Kriventseva, E. V., & Zdobnov, E. M. (2015). BUSCO: assessing genome assembly and annotation completeness with single-copy orthologs. _Bioinformatics_, 31(19), 3210-3212.  
+4. Simão, F. A., Waterhouse, R. M., Ioannidis, P., Kriventseva, E. V., & Zdobnov, E. M. (2015). BUSCO: assessing genome assembly and annotation completeness with single-copy orthologs. _Bioinformatics_, 31(19), 3210-3212.  
 
-Gurevich, A., Saveliev, V., Vyahhi, N., & Tesler, G. (2013). QUAST: quality assessment tool for genome assemblies. _Bioinformatics_, 29(8), 1072-1075.
+5. Gurevich, A., Saveliev, V., Vyahhi, N., & Tesler, G. (2013). QUAST: quality assessment tool for genome assemblies. _Bioinformatics_, 29(8), 1072-1075.
 
 ### Trimming
-Bolger, A. M., Lohse, M., & Usadel, B. (2014). Trimmomatic: a flexible trimmer for Illumina sequence data. _Bioinformatics_, 30(15), 2114-2120.  
+6. Bolger, A. M., Lohse, M., & Usadel, B. (2014). Trimmomatic: a flexible trimmer for Illumina sequence data. _Bioinformatics_, 30(15), 2114-2120.  
 
-Furqon, A. D. C., Wick, R. R., Roberts, L. W., & Hall, M. B. (2026). Evaluating Nanopore read trimming and quality filtering in bacterial genomics. _bioRxiv_, 2026-10.  
+7. Furqon, A. D. C., Wick, R. R., Roberts, L. W., & Hall, M. B. (2026). Evaluating Nanopore read trimming and quality filtering in bacterial genomics. _bioRxiv_, 2026-10.  
 
 
 ### Assembly
-Wick, R. R., Judd, L. M., Gorrie, C. L., & Holt, K. E. (2017). Unicycler: resolving bacterial genome assemblies from short and long sequencing reads. _PLoS computational biology_, 13(6), e1005595.
+8. Wick, R. R., Judd, L. M., Gorrie, C. L., & Holt, K. E. (2017). Unicycler: resolving bacterial genome assemblies from short and long sequencing reads. _PLoS computational biology_, 13(6), e1005595.
 
 ### Mapping
-Li, H. (2018). Minimap2: pairwise alignment for nucleotide sequences. _Bioinformatics_, 34(18), 3094-3100.  
+9. Li, H. (2018). Minimap2: pairwise alignment for nucleotide sequences. _Bioinformatics_, 34(18), 3094-3100.  
 
-Danecek, P., Bonfield, J. K., Liddle, J., Marshall, J., Ohan, V., Pollard, M. O., ... & Li, H. (2021). Twelve years of SAMtools and BCFtools. _Gigascience_, 10(2), giab008.  
+10. Danecek, P., Bonfield, J. K., Liddle, J., Marshall, J., Ohan, V., Pollard, M. O., ... & Li, H. (2021). Twelve years of SAMtools and BCFtools. _Gigascience_, 10(2), giab008.  
 
-Li, H., & Durbin, R. (2009). Fast and accurate short read alignment with Burrows–Wheeler transform. _Bioinformatics_, 25(14), 1754-1760.
+11. Li, H., & Durbin, R. (2009). Fast and accurate short read alignment with Burrows–Wheeler transform. _Bioinformatics_, 25(14), 1754-1760.
