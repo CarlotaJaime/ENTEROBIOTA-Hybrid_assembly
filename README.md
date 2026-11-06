@@ -19,8 +19,8 @@ For the quality control of Illumina data, `FastQC` and `MultiQC` are used for qu
 For Nanopore, a quality control of raw data is performed with `NanoPlot`, the sequences are trimmed with `Filtlong` and a following quality control of filtered data is also performed by `NanoPlot`.
 
 | Sequencing strategy | Bioinformatic tools | Version | Citation | Repository |
-| :---: | :---: | :---: | :---: |
-| Illumina | FastQC | 0.13.0 | [[1]] (#wingett-s-w--andrews-s-2018-fastq-screen-tool-for-multi-genome-mapping-and-quality-control-f1000research-7-1338) | [GitHub] (https://github.com/s-andrews/FastQC.git) |
+| :---: | :---: | :---: | :---: | :---: |
+| Illumina | FastQC | 0.13.0 | [[1]](#wingett-s-w--andrews-s-2018-fastq-screen-tool-for-multi-genome-mapping-and-quality-control-f1000research-7-1338) | [GitHub](https://github.com/s-andrews/FastQC.git) |
 | Illumina | MultiQC | 1.35.0 | [[2]] |
 | Illumina | Trimmomatic | 0.41 | [[6]] |
 | Nanopore | NanoPlot | 1.48.0 | [[3]] |
