@@ -15,8 +15,8 @@ This repository contains the codes used in the hybrid assembly of the ENTEROBIOT
 This project aims to characterize the genomes of clinical and probiotic isolates of _Enterococcus faecalis_ and _Enterococcus faecium_ for identification of virulence factors and antimicrobial resistance genes, while studying the mobile genetic elements of those genomes for acquisition and dissemination analysis of the virulence and resistance genes.
 
 ## Quality control and processing
-For the quality control of Illumina data, FastQC and MultiQC are used for quality control of raw data, then Trimmomatic is used for the trimming of the raw reads, and a quality control of trimmed reads is performed also with FastQC and MultiQC.
-For Nanopore, a quality control of raw data is performed with NanoPlot, the sequences are trimmed with Filtlong and a following quality control of filtered data is also performed by NanoPlot.
+For the quality control of Illumina data, `FastQC` and `MultiQC` are used for quality control of raw data, then `Trimmomatic` is used for the trimming of the raw reads, and a quality control of trimmed reads is performed also with `FastQC` and `MultiQC`.
+For Nanopore, a quality control of raw data is performed with `NanoPlot`, the sequences are trimmed with `Filtlong` and a following quality control of filtered data is also performed by `NanoPlot`.
 
 ## Hybrid assembly
 The workflow has integrated a decision block that depending on the quality of the reads there are two possibilities of assembly:
@@ -24,7 +24,7 @@ The workflow has integrated a decision block that depending on the quality of th
 ### Unicycler
 This tool is used when the quality of ONT data is insufficient. The assembly is performed with the short-reads-first strategy using Illumina reads to performe the initial assembly that is polished with Nanopore data.
 ### Autocycler
-This tool is used when the quality of ONT data is sufficient. The assembly is performed with the long-reads-first strategy using ONT reads to perform the initial assembly and Polypolish is used to polish the ONT assembly with Illumina reads. Additionally, Medaka is used to polish the ONT data before the initial assembly.  
+This tool is used when the quality of ONT data is sufficient. The assembly is performed with the long-reads-first strategy using ONT reads to perform the initial assembly and `Polypolish` is used to polish the ONT assembly with Illumina reads. Additionally, `Medaka` is used to polish the ONT data before the initial assembly.  
 
 The parameters of decision are based on ONT quality data and are defined in `nextflow.config`:  
 - Minimal ONT depth = 20X

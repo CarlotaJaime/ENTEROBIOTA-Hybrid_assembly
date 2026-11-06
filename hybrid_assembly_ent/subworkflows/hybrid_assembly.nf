@@ -41,10 +41,10 @@ workflow HYBRID_ASSEMBLY {
                                         }
 
     // Separate samples depending on the strategy selected
-    ch_unicycler_ont = ch_ont_quality.filter { meta, ontfile, strategy -> strategy == 'unicycler'}
-                                    .map { meta, ontfile, strategy -> tuple(meta, ontfile) }
-    ch_autocycler_ont = ch_ont_quality.filter { meta, ontfile, strategy -> strategy == 'autocycler'}
-                                    .map { meta, ontfile, strategy -> tuple(meta, ontfile) }
+    ch_unicycler_ont = ch_ont_quality.filter { _meta, _ontfile, strategy -> strategy == 'unicycler'} // Added meta and ontfile in .filter operator but is not used (silenced with _)
+                                    .map { meta, ontfile, _strategy -> tuple(meta, ontfile) } // Added strategy in .map operator but is not used (silenced with _)
+    ch_autocycler_ont = ch_ont_quality.filter { _meta, _ontfile, strategy -> strategy == 'autocycler'} // Added meta and ontfile in .filter operator but is not used (silenced with _)
+                                    .map { meta, ontfile, _strategy -> tuple(meta, ontfile) } // Added strategy in .map operator but is not used (silenced with _)
 
     // Unicycler strategy for assembly
     ch_unicycler_input = ch_illumina.join(ch_unicycler_ont, by: 0)

@@ -59,10 +59,10 @@ workflow {
     */
     ch_input = channel.fromPath(params.input)
                         .splitCsv(header: true)
-                        .map { row -> tuple( [id: row.sample.toString(), genome_size: genome_size],
-                        tuple( file(row.illumina_r1), file(row.illumina_r2), file(row.ont)))}
-    ch_illumina_raw = ch_input.map { meta, r1, r2, ont -> tuple(meta, r1, r2) }
-    ch_ont_raw = ch_input.map { meta, r1, r2, ont -> tuple(meta, r1, r2) }
+                        .map { row -> def meta = [id: row.sample.toString(),genome_size: genome_size]
+                        tuple( meta, file(row.illumina_r1), file(row.illumina_r2), file(row.ont))}
+    ch_illumina_raw = ch_input.map { meta, r1, r2, _ont -> tuple(meta, r1, r2) } // Added ont in .map operator but is not used (silenced with _)
+    ch_ont_raw = ch_input.map { meta, _r1, _r2, ont -> tuple(meta, ont) } // Added r1 and r2 in .map operator but is not used (silenced with _)
 
     PREPROCESSING ( ch_illumina_raw, ch_ont_raw)
     HYBRID_ASSEMBLY (PREPROCESSING.out.trimmed_illumina, PREPROCESSING.out.filtered_ont)
