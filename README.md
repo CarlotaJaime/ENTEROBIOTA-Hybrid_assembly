@@ -1,15 +1,15 @@
 # ENTEROBIOTA-Hybrid_assembly
 This repository contains the codes used in the hybrid assembly of the ENTEROBIOTA project.
 
-# Table of contents
-- [Introduction] (#introduction)
-- [Quality control and processing] (#quality-control-and-processing)
-- [Hybrid assembly] (#hybrid-assembly)
-    - [Unicycler] (#unicycler)
-    - [Autocycler] (#Autocycler)
-- [Characterization] (#characterization)
-- [Execute the workflow] (#execute-the-workflow)
-- [Citation] (#citation)
+## Table of contents
+- [Introduction](#introduction)
+- [Quality control and processing](#quality-control-and-processing)
+- [Hybrid assembly](#hybrid-assembly)
+    - [Unicycler](#unicycler)
+    - [Autocycler](#Autocycler)
+- [Characterization](#characterization)
+- [Execute the workflow](#execute-the-workflow)
+- [Citation](#citation)
 
 ## Introduction
 This project aims to characterize the genomes of clinical and probiotic isolates of _Enterococcus faecalis_ and _Enterococcus faecium_ for identification of virulence factors and antimicrobial resistance genes, while studying the mobile genetic elements of those genomes for acquisition and dissemination analysis of the virulence and resistance genes.
