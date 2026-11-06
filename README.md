@@ -34,13 +34,28 @@ This tool is used when the quality of ONT data is insufficient. The assembly is 
 ### Autocycler
 This tool is used when the quality of ONT data is sufficient. The assembly is performed with the long-reads-first strategy using ONT reads to perform the initial assembly and `Polypolish` is used to polish the ONT assembly with Illumina reads. Additionally, `Medaka` is used to polish the ONT data before the initial assembly.  
 
+| Assembly strategy | Bioinformatic tools | Version | Citation | Repository |
+| :---: | :---: | :---: | :---: | :---: |
+| Short-reads-first | Unicycler | 0.5.1 | 8 | [Unicycler repository ](https://github.com/rrwick/Unicycler.git) |
+| Long-reads-first | Autocycler | 0.8.0 | 9 | [Autocycler repository ](https://github.com/rrwick/Autocycler.git) |
+| Long-reads-first | Medaka | 2.2.2 | 10 | [Medaka repository ](https://github.com/nanoporetech/medaka.git) |
+| Long-reads-first | Polypolish | 0.7.1 | 11 | [Polypolish repository ](https://github.com/rrwick/Polypolish.git) |
+
 The parameters of decision are based on ONT quality data and are defined in `nextflow.config`:  
 - Minimal ONT depth = 20X
 - Minimal mean quality = X
 - Minimal N50 value = X
 
 ## Characterization
-The quality control of the assembly is performed with BUSCO and QUAST, then a mapping is performed for ONT and Illumina reads against the hybrid assembly, and the error rate of the assembly is calculated.
+The quality control of the assembly is performed with `BUSCO` and `QUAST`, then a mapping is performed for ONT and Illumina reads against the hybrid assembly, and the error rate of the assembly is calculated.
+
+| Sequencing strategy | Bioinformatic tools | Version | Citation | Repository |
+| :---: | :---: | :---: | :---: | :---: |
+| Illumina and Nanopore | BUSCO | 6.1.0 | 4 | [BUSCO repository ](https://github.com/metashot/busco.git) |
+| Illumina and Nanopore | QUAST | 5.3.0 | 5 | [QUAST repository ](https://github.com/ablab/quast.git) |
+| Illumina | bwa | 2.2.2 | 12 | [bwa repository ](https://github.com/lh3/bwa.git) |
+| Illumina | samtools | 0.7.1 | 13 | [samtools repository ](https://github.com/samtools/samtools.git) |
+| Illumina | minimap2 | 0.7.1 | 14 | [minimap2 repository ](https://github.com/lh3/minimap2.git) |
 
 ## Execute the workflow
 In order to execute the workflow the `samplesheet.csv` must have this structure following the structure of a CSV file:
@@ -84,11 +99,18 @@ nextflow run main.nf \
 
 
 ### Assembly
-8. Wick, R. R., Judd, L. M., Gorrie, C. L., & Holt, K. E. (2017). Unicycler: resolving bacterial genome assemblies from short and long sequencing reads. _PLoS computational biology_, 13(6), e1005595.
+8. Wick, R. R., Judd, L. M., Gorrie, C. L., & Holt, K. E. (2017). Unicycler: resolving bacterial genome assemblies from short and long sequencing reads. _PLoS computational biology_, 13(6), e1005595.  
+
+9. Wick, R. R., Howden, B. P., & Stinear, T. P. (2025). Autocycler: long-read consensus assembly for bacterial genomes. Bioinformatics, 41(9), btaf474.
+
+### Polishing
+10. https://github.com/nanoporetech/medaka.git  
+
+11. Wick, R. R., & Holt, K. E. (2022). Polypolish: short-read polishing of long-read bacterial genome assemblies. PLoS computational biology, 18(1), e1009802.
 
 ### Mapping
-9. Li, H. (2018). Minimap2: pairwise alignment for nucleotide sequences. _Bioinformatics_, 34(18), 3094-3100.  
+12. Li, H., & Durbin, R. (2009). Fast and accurate short read alignment with Burrows–Wheeler transform. _Bioinformatics_, 25(14), 1754-1760.  
 
-10. Danecek, P., Bonfield, J. K., Liddle, J., Marshall, J., Ohan, V., Pollard, M. O., ... & Li, H. (2021). Twelve years of SAMtools and BCFtools. _Gigascience_, 10(2), giab008.  
+13. Danecek, P., Bonfield, J. K., Liddle, J., Marshall, J., Ohan, V., Pollard, M. O., ... & Li, H. (2021). Twelve years of SAMtools and BCFtools. _Gigascience_, 10(2), giab008.  
 
-11. Li, H., & Durbin, R. (2009). Fast and accurate short read alignment with Burrows–Wheeler transform. _Bioinformatics_, 25(14), 1754-1760.
+14. Li, H. (2018). Minimap2: pairwise alignment for nucleotide sequences. _Bioinformatics_, 34(18), 3094-3100.  
